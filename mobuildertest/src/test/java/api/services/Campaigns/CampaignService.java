@@ -1,4 +1,4 @@
-package api.services;
+package api.services.Campaigns;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
