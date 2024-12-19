@@ -1,114 +1,41 @@
 package api.tests;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import api.services.CampaignService;
+import configs.TestConfig;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 
-public class CampaignApiTest {
+public class CampaignApiTest extends TestConfig {
 
-    private static final String BASE_URL = "https://mo.trafficfilter.pro/dev/api/campaigns";
-    private static final String CAMPAIGN_JSON = "{ " +
-            "\"name\": \"CampaignApiTest\", " +
-            "\"geo\": \"uk\", " +
-            "\"lang\": \"en\", " +
-            "\"type\": \"blackhat\", " +
-            "\"template_name\": \"template_name\"" +
-            "}";
-
-    @BeforeAll
-    public static void setup() {
-        RestAssured.baseURI = BASE_URL;
-    }
+    private final CampaignService campaignService = new CampaignService();
 
     @Test
     public void testCreateUpdateVerifyAndDeleteCampaign() {
-        // Step 1: Create campaign
-        Response response = createCampaign(CAMPAIGN_JSON);
-        String campaignId = response.path("id");
-        String name = response.path("name");
-        String geo = response.path("geo");
-        String type = response.path("type");
+        // Step 1: Create Campaign
+        String campaignJson = readFileAsString("src/test/resources/campaign.json");
+        Response createResponse = campaignService.createCampaign(campaignJson);
+        String campaignId = createResponse.path("id");
 
-        // Step 2: Verify campaign details
-        verifyCampaignDetails(campaignId, name, geo, type);
+        // Step 2: Verify Campaign Details
+        Response getResponse = campaignService.getCampaign(campaignId);
+        String campaignName = getResponse.jsonPath().getString("name");
+        System.out.println("Campaign name: " + campaignName);
+        assertThat(campaignName, equalTo("CampaignApiTest"));
 
-        // Step 3: Update campaign
-        String updatedName = "UpdatedCampaignName";
-        updateCampaign(campaignId, updatedName);
+        // Step 3: Update Campaign
+        String updatedJson = readFileAsString("src/test/resources/updated_campaign.json");
+        campaignService.updateCampaign(campaignId, updatedJson);
 
-        // Step 4: Verify updated campaign
-        verifyUpdatedCampaign(campaignId, updatedName);
+        // Step 4: Verify Updated Campaign
+        Response updatedResponse = campaignService.getCampaign(campaignId);
+        String updatedcampaignName = updatedResponse.jsonPath().getString("name");
+        System.out.println("Campaign name: " + updatedcampaignName);
+        assertThat(updatedcampaignName, equalTo("UpdatedCampaignName"));
 
-        // Step 5: Delete campaign
-        deleteCampaign(campaignId);
-    }
-
-    private Response createCampaign(String campaignJson) {
-        return given()
-                .contentType(ContentType.JSON)
-                .body(campaignJson)
-                .when()
-                .post("")
-                .then()
-                .statusCode(201)
-                .extract()
-                .response();
-    }
-
-    private void verifyCampaignDetails(String campaignId, String name, String geo, String type) {
-        given()
-                .when()
-                .get("/" + campaignId)
-                .then()
-                .log().all()
-                .statusCode(200);
-
-        assertThat(name, equalTo("CampaignApiTest"));
-        assertThat(geo, equalTo("uk"));
-        assertThat(type, equalTo("blackhat"));
-    }
-
-    private void updateCampaign(String campaignId, String updatedName) {
-        String updatedCampaignJson = "{ " +
-                "\"name\": \"" + updatedName + "\", " +
-                "\"geo\": \"uk\", " +
-                "\"lang\": \"en\", " +
-                "\"type\": \"blackhat\", " +
-                "\"template_name\": \"template_name\"" +
-                "}";
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(updatedCampaignJson)
-                .when()
-                .put("/" + campaignId)
-                .then()
-                .log().all()
-                .statusCode(200);
-    }
-
-    private void verifyUpdatedCampaign(String campaignId, String name) {
-        given()
-                .when()
-                .get("/" + campaignId)
-                .then()
-                .log().all()
-                .statusCode(200);
-
-        assertThat(name, equalTo("UpdatedCampaignName"));
-    }
-    private void deleteCampaign(String campaignId) {
-        given()
-                .when()
-                .delete("/" + campaignId)
-                .then()
-                .log().all()
-                .statusCode(200);
+        // Step 5: Delete Campaign
+        campaignService.deleteCampaign(campaignId);
     }
 }
