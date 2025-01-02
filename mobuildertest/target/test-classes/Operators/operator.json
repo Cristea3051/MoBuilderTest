@@ -1,0 +1,9 @@
+{
+    "brand_name": "OperatorApiTest",
+    "affiliate_network": "affTestNet",
+    "affiliate_network_alias": "affNetTestAlias",
+    "logo_image_base_white": "img_path_white",
+    "logo_image_main": "img_path",
+    "logo_background_main": "img_path",
+    "logo_image_base_dark": "img_path_dark"
+}
