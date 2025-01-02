@@ -21,7 +21,6 @@ public class OperatorApiTest extends TestConfig {
 
         // Step 2: Extract Operator ID by Brand Name
         String operatorId = operatorService.extractOperatorIdByBrandName("OperatorApiTest");
-        System.out.println("Extracted Operator ID: " + operatorId);
 
         // Step 3: Verify Operator Details
         Response getResponse = operatorService.getOperator(operatorId);
@@ -39,6 +38,5 @@ public class OperatorApiTest extends TestConfig {
 
         // Step 6: Delete Operator
         operatorService.deleteOperator(operatorId);
-        System.out.println("Operator deleted successfully.");
     }
 }
