@@ -8,13 +8,17 @@ import api.services.Operators.OperatorService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
+import java.util.List;
 
 public class OperatorApiTest extends TestConfig {
 
     private final OperatorService operatorService = new OperatorService();
 
     @Test
-    public void testCreateUpdateVerifyAndDeleteOperator() {
+    public void test01_CreateUpdateVerifyAndDeleteOperator() {
         // Step 1: Create Operator
         String operatorJson = readFileAsString("src/test/resources/Operators/operator.json");
         operatorService.createOperator(operatorJson);
@@ -39,4 +43,29 @@ public class OperatorApiTest extends TestConfig {
         // Step 6: Delete Operator
         operatorService.deleteOperator(operatorId);
     }
+
+    @Test
+    public void test02_BulkStoreOperators() {
+        // Step 1: Bulk Store Operators
+        String bulkOperatorsJson = readFileAsString("src/test/resources/Operators/bulkOperators.json");
+        Response bulkStoreResponse = operatorService.bulkStoreOperators(bulkOperatorsJson);
+        assertThat("Bulk store response status code should be 201", bulkStoreResponse.statusCode(), equalTo(201));
+
+    }
+
+    @Test
+    public void test03_BulkDeleteOperators() {
+        List<String> operatorNames = List.of("Casino 1 Operator API Test Automation",
+                "Casino 2 Operator API Test Automation");
+        // Asigură-te că operatorii există înainte
+        operatorNames.forEach(name -> {
+            String operatorId = operatorService.extractOperatorIdByBrandName(name);
+            assertThat("Operator ID should not be null for " + name, operatorId, notNullValue());
+        });
+
+        // Șterge operatorii în masă
+        Response deleteResponse = operatorService.bulkDeleteOperatorsByNames(operatorNames);
+        assertThat("Bulk delete should be successful", deleteResponse.getStatusCode(), is(200));
+    }
+
 }
