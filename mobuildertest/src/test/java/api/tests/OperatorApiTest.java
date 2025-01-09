@@ -44,26 +44,24 @@ public class OperatorApiTest extends TestConfig {
         operatorService.deleteOperator(operatorId);
     }
 
+    // Step 7: Bulk Store Operators
     @Test
     public void test02_BulkStoreOperators() {
-        // Step 1: Bulk Store Operators
         String bulkOperatorsJson = readFileAsString("src/test/resources/Operators/bulkOperators.json");
         Response bulkStoreResponse = operatorService.bulkStoreOperators(bulkOperatorsJson);
         assertThat("Bulk store response status code should be 201", bulkStoreResponse.statusCode(), equalTo(201));
 
     }
-
+   // Step 8: Bulk Delete Operators
     @Test
     public void test03_BulkDeleteOperators() {
         List<String> operatorNames = List.of("Casino 1 Operator API Test Automation",
                 "Casino 2 Operator API Test Automation");
-        // Asigură-te că operatorii există înainte
         operatorNames.forEach(name -> {
             String operatorId = operatorService.extractOperatorIdByBrandName(name);
             assertThat("Operator ID should not be null for " + name, operatorId, notNullValue());
         });
 
-        // Șterge operatorii în masă
         Response deleteResponse = operatorService.bulkDeleteOperatorsByNames(operatorNames);
         assertThat("Bulk delete should be successful", deleteResponse.getStatusCode(), is(200));
     }
