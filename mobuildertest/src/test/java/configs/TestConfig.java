@@ -3,6 +3,9 @@ package configs;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class TestConfig {
 
     @BeforeAll
@@ -12,10 +15,9 @@ public class TestConfig {
 
     protected String readFileAsString(String filePath) {
         try {
-            return new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(filePath)));
+            return new String(Files.readAllBytes(Paths.get(filePath)));
         } catch (Exception e) {
             throw new RuntimeException("Failed to read file: " + filePath, e);
         }
     }
-
 }
